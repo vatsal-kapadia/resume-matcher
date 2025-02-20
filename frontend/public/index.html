@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Generator</title>
+</head>
+<body>
+    <h1>Resume Generator</h1>
+    <form id="resumeForm">
+        <label for="resume">Resume:</label> 
+        <textarea id="resume" name="resume" required></textarea>
+
+        <label for="jobDescription">Job Description:</label>
+        <textarea id="jobDescription" name="jobDescription" required></textarea>
+
+        <button type="submit">Generate Resume</button>
+    </form>
+
+    <div id="result"></div>   
+    <h2>Generated Resume:</h2>
+    <textarea id="generated-resume" readonly></textarea> <!-- Non-editable text box for generated resume -->
+
+    <h2>Generated Cover Letter:</h2>
+    <textarea id="generated-cover-letter" readonly></textarea> <!-- Non-editable text box for generated cover letter -->
+
+    <h2>Job Alignment Score:</h2>
+    <input type="text" id="alignment-score" readonly /> <!-- Non-editable text box for alignment score -->
+
+    <script>
+        document.getElementById("resumeForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const resume = document.getElementById("resume").value;
+            const jobDescription = document.getElementById("jobDescription").value;
+
+            // Basic form validation
+            if (!resume || !jobDescription) {
+                alert("Please fill in both the resume and job description.");
+                return;
+            }
+
+            try {
+                // Send data to the server
+                const response = await fetch("http://127.0.0.1:5000/generate", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ resume, job_description: jobDescription })
+                });
+
+                const result = await response.json();
+
+                if (result.error) {
+                    alert(result.error);
+                } else {
+                    // Display the generated resume, cover letter, and alignment score
+                    document.getElementById("generated-resume").value = result.resume;
+                    document.getElementById("generated-cover-letter").value = result.cover_letter;
+                    document.getElementById("alignment-score").value = `${result.alignment_score}%`;
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("There was an error processing your request. Please try again later.");
+            }
+        });
+    </script> 
+</body>
+</html>
+
